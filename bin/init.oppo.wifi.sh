@@ -219,7 +219,19 @@ chown system:wifi /mnt/vendor/persist/bdwlan.bin
 #Yuan.Huang@PSW.CN.Wifi.Network.internet.1074197, 2016/11/09,
 #Add for make WCNSS_qcom_cfg.ini Rom-update.
 if [ -s /vendor/etc/wifi/WCNSS_qcom_cfg.ini ]; then
-	system_version=`head -1 /vendor/etc/wifi/WCNSS_qcom_cfg.ini | grep OppoVersion | cut -d= -f2`
+
+	#ifdef VENDOR_EDIT
+	#Shaoge.Ma@CONNECTIVITY.WIFI.BASIC.POWER. 2020/05/29
+	#Add for high current when download on 11B for 19698 taiwan
+	#system_version=`head -1 /vendor/etc/wifi/WCNSS_qcom_cfg.ini | grep OppoVersion | cut -d= -f2`
+	#else /*VENDOR_EDIT*/
+	if [ $prj_version -eq "19696" -a $operatorName -ne "34" ]; then
+		system_version=`head -1 /vendor/etc/wifi/WCNSS_qcom_cfg.ini | grep OppoVersion | cut -d= -f2`
+	else
+		system_version=`head -1 /vendor/etc/wifi/WCNSS_qcom_cfg_19698.ini | grep OppoVersion | cut -d= -f2`
+	fi
+	#endif /* ODM_WT_EDIT */
+
 	if [ "${system_version}x" = "x" ]; then
 		system_version=1
 	fi
@@ -243,8 +255,19 @@ else
 fi
 
 if [ ! -s /mnt/vendor/persist/WCNSS_qcom_cfg.ini -o $system_version -gt $persist_version ]; then
-    cp /vendor/etc/wifi/WCNSS_qcom_cfg.ini \
-            /mnt/vendor/persist/WCNSS_qcom_cfg.ini
+
+	#ifdef VENDOR_EDIT
+	#Shaoge.Ma@CONNECTIVITY.WIFI.BASIC.POWER. 2020/05/29
+	#Add for high current when download on 11B for 19698 taiwan
+	if [ $prj_version -eq "19696" -a $operatorName -ne "34" ]; then
+		cp /vendor/etc/wifi/WCNSS_qcom_cfg.ini \
+				/mnt/vendor/persist/WCNSS_qcom_cfg.ini
+	else
+		cp /vendor/etc/wifi/WCNSS_qcom_cfg_19698.ini \
+				/mnt/vendor/persist/WCNSS_qcom_cfg.ini
+	fi
+	#endif /* ODM_WT_EDIT */
+
     chown system:wifi /mnt/vendor/persist/WCNSS_qcom_cfg.ini
     chmod 666 /mnt/vendor/persist/WCNSS_qcom_cfg.ini
 fi
